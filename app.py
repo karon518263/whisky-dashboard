@@ -19,14 +19,53 @@ st.sidebar.caption("資料來源：P9 品酒網")
 
 if menu == "儀表板總覽":
     st.title("📊 市場概況總覽")
+    
+    # 取得統計數據
     stats = db_utils.get_dashboard_stats()
+    
+    # 顯示 KPI 卡片
     c1, c2, c3 = st.columns(3)
     c1.metric("總收錄貼文", f"{stats['total_posts']} 篇")
     c2.metric("活躍品牌數", f"{stats['total_brands']} 個")
     c3.metric("近期新增", f"{stats['recent_posts']} 篇", delta="New")
+    
     st.markdown("---")
-    st.subheader("🕒 最新 10 筆市場報價")
-    st.dataframe(db_utils.get_latest_posts(10), use_container_width=True, hide_index=True)
+    
+    # --- 最新報價區塊 (修正重點) ---
+    st.subheader("🕒 最新 100 筆市場報價")
+    st.caption("💡 提示：點擊表格上方的欄位名稱 (如「價格」、「品牌」) 即可進行排序")
+
+    # 1. 取得最新 100 筆資料 (含完整欄位)
+    latest_df = db_utils.get_latest_posts(100)
+    
+    if not latest_df.empty:
+        # 2. 整理顯示欄位
+        display_df = latest_df[[
+            'post_date', 'brand', '標準品名', 'year', 'series', 'style', 'price_per_bottle', 'author', 'post_url'
+        ]].copy()
+        
+        display_df.columns = [
+            '日期', '品牌', '品名', '年份', '系列', '桶號/桶型', '單價', '賣家', '前往賣場'
+        ]
+
+        # 3. 顯示互動式表格 (支援排序與超連結)
+        st.dataframe(
+            display_df,
+            column_config={
+                "單價": st.column_config.NumberColumn(format="$%d"),
+                "前往賣場": st.column_config.LinkColumn(
+                    "連結", 
+                    display_text="🔗", 
+                    help="點擊前往 P9 原始貼文"
+                ),
+                "年份": st.column_config.TextColumn(),
+                "系列": st.column_config.TextColumn(),
+            },
+            use_container_width=True,
+            hide_index=True
+        )
+    else:
+        st.info("目前資料庫中沒有資料。")
 
 elif menu == "酒款搜尋 & 趨勢":
     st.title("🔎 酒款行情查詢")
@@ -63,20 +102,17 @@ elif menu == "酒款搜尋 & 趨勢":
             fig.add_hline(y=avg_price, line_dash="dash", line_color="red", annotation_text="平均價")
             st.plotly_chart(fig, use_container_width=True)
             
-            # --- 詳細資料表 (修正：加入 'series' 系列欄位) ---
+            # --- 詳細資料表 ---
             st.subheader("📋 詳細報價清單")
             
-            # 1. 這裡把 'series' 加進去
             display_df = df_search[[
                 'post_date', 'brand', '標準品名', 'year', 'series', 'style', 'price_per_bottle', 'author', 'post_url'
             ]].copy()
             
-            # 2. 對應的中文欄位名稱也要加 '系列'
             display_df.columns = [
                 '日期', '品牌', '品名', '年份', '系列', '桶號/桶型', '單價', '賣家', '前往賣場'
             ]
             
-            # 3. 處理空值顯示 (把 None 變成空字串，看起來比較乾淨)
             display_df['系列'] = display_df['系列'].fillna('')
 
             st.dataframe(
@@ -89,7 +125,7 @@ elif menu == "酒款搜尋 & 趨勢":
                         help="點擊前往 P9 原始貼文"
                     ),
                     "年份": st.column_config.TextColumn(),
-                    "系列": st.column_config.TextColumn(), # 確保系列是文字格式
+                    "系列": st.column_config.TextColumn(),
                 },
                 use_container_width=True,
                 hide_index=True
