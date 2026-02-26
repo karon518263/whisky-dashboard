@@ -12,12 +12,12 @@ DRY_RUN = False #True = 試跑(不存)， False = 正式(存檔)
 DB_NAME = 'P9_whiskey_project.db'
 
 #抓取的天數
-DAYS_TO_SCRAPE = 7
+DAYS_TO_SCRAPE = 2
 
 TARGET_DATE = (datetime.now() - timedelta(days=DAYS_TO_SCRAPE)).strftime('%Y/%m/%d')
 
-MISS_LIMIT = 40 
-MAX_PAGES = 30
+MISS_LIMIT = 20
+MAX_PAGES = 10
 
 
 cutoff_date = datetime.now() - timedelta(days=DAYS_TO_SCRAPE)
