@@ -5,12 +5,12 @@ import db_utils
 
 # --- 1. 頁面設定 ---
 st.set_page_config(
-    page_title="P9 威士忌行情儀表板",
+    page_title="P9 Whisky Secondary Market Monitor",
     page_icon="🥃",
     layout="wide"
 )
 
-st.sidebar.title("🥃 查詢選項")
+st.sidebar.title("🥃 P9 Whisky Secondary Market Monitor")
 menu = st.sidebar.radio("功能導覽", ["儀表板總覽", "酒款搜尋 & 趨勢", "熱門品牌排行"])
 st.sidebar.markdown("---")
 st.sidebar.caption("資料來源：P9 品酒網")
@@ -31,11 +31,11 @@ if menu == "儀表板總覽":
     
     st.markdown("---")
     
-    # --- 最新報價區塊 (修正重點) ---
+    # --- 最新報價區塊 ---
     st.subheader("🕒 最新 100 筆市場報價")
     st.caption("💡 提示：點擊表格上方的欄位名稱 (如「價格」、「品牌」) 即可進行排序")
 
-    # 1. 取得最新 100 筆資料 (含完整欄位)
+    # 1. 取得最新 100 筆資料 
     latest_df = db_utils.get_latest_posts(100)
     
     if not latest_df.empty:
@@ -48,7 +48,7 @@ if menu == "儀表板總覽":
             '日期', '品牌', '品名', '年份', '系列', '桶號/桶型', '單價', '賣家', '前往賣場'
         ]
 
-        # 3. 顯示互動式表格 (支援排序與超連結)
+        # 3. 顯示互動式表格
         st.dataframe(
             display_df,
             column_config={

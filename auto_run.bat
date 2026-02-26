@@ -14,7 +14,7 @@ python run_all.py
 echo === [2/2] 準備將最新資料庫上傳到 GitHub ===
 
 :: 將更新後的資料庫加入上傳清單
-git add whisky_market.db
+git add .
 
 :: 幫這次的上傳寫個標記 (包含日期與時間)
 git commit -m "Auto update DB %date% %time%"
