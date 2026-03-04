@@ -76,7 +76,7 @@ elif menu == "酒款搜尋 & 趨勢":
     with col1:
         search_keyword = st.text_input("🥃 品牌/品名 (如:麥卡倫)", "Macallan")
     with col2:
-        search_series = st.text_input("🏷️ 系列 (如:12年)", "")
+        search_series = st.text_input("🏷️ 年份/系列 (如:18或原酒)", "")
     with col3:
         search_cask = st.text_input("🛢️ 桶型 (如:雪莉桶)", "")
     with col4:

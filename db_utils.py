@@ -81,8 +81,9 @@ def search_whisky(keyword="", series="", cask_type="", seller="", days=30):
         query += " AND (w.brand LIKE ? OR w.product_name LIKE ?)"
         params.extend([f'%{keyword}%', f'%{keyword}%'])
     if series:
-        query += " AND w.series LIKE ?"
-        params.append(f'%{series}%')
+        clean_year = series.replace('年', '').strip()
+        query += " AND (w.series LIKE ? OR CAST(w.year AS TEXT) LIKE ?)"
+        params.extend([f'%{series}%', f'%{clean_year}%'])
     if cask_type:
         query += " AND w.style LIKE ?"
         params.append(f'%{cask_type}%')
