@@ -56,27 +56,49 @@ def get_latest_posts(limit=100):
     
     return df
 
-def search_whisky(keyword, days=30):
-    """搜尋並回傳符合您指定欄位的資料"""
-    conn = get_connection()
-    sql = """
-    SELECT p.post_date, w.brand, w.product_name, w.year, w.series, w.style, 
-           w.price_per_bottle, p.author, p.post_url
-    FROM whisky_prices w
-    JOIN posts p ON w.post_id = p.id
-    WHERE (w.product_name LIKE ? OR w.brand LIKE ?)
-    AND p.post_date >= date('now', '-' || ? || ' days')
-    ORDER BY p.post_date DESC
+def search_whisky(keyword="", series="", cask_type="", seller="", days=30):
     """
-    df = pd.read_sql(sql, conn, params=(f'%{keyword}%', f'%{keyword}%', days))
+    多維度關鍵字搜尋：品名、系列、桶型、賣家
+    """
+    # 使用正確的連線函式
+    conn = get_connection()
+    
+    # 使用 JOIN 結合 posts 與 whisky_prices，對應真實的欄位名稱
+    query = """
+        SELECT p.post_date, w.brand, w.product_name, w.year, w.series, w.style, 
+               w.price_per_bottle, p.author, p.post_url
+        FROM whisky_prices w
+        JOIN posts p ON w.post_id = p.id
+        WHERE p.post_date >= date('now', ?)
+    """
+    params = [f'-{days} days']
+
+    # 動態加入搜尋條件
+    if keyword:
+        query += " AND (w.brand LIKE ? OR w.product_name LIKE ?)"
+        params.extend([f'%{keyword}%', f'%{keyword}%'])
+    if series:
+        query += " AND w.series LIKE ?"
+        params.append(f'%{series}%')
+    if cask_type:
+        query += " AND w.style LIKE ?"
+        params.append(f'%{cask_type}%')
+    if seller:
+        query += " AND p.author LIKE ?"
+        params.append(f'%{seller}%')
+
+    query += " ORDER BY p.post_date DESC, p.id DESC"
+    
+    df = pd.read_sql_query(query, conn, params=params)
     conn.close()
     
+    # 自動套用標準品名格式
     if not df.empty:
         df['標準品名'] = df.apply(format_standard_name, axis=1)
         df['year'] = df['year'].fillna(0).astype(int).astype(str).replace('0', '')
         df['style'] = df['style'].fillna('')
         df['series'] = df['series'].fillna('')
-    
+        
     return df
 
 def get_top_brands_stats(days=30, limit=10):

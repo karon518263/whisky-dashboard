@@ -68,16 +68,33 @@ if menu == "儀表板總覽":
         st.info("目前資料庫中沒有資料。")
 
 elif menu == "酒款搜尋 & 趨勢":
-    st.title("🔎 酒款行情查詢")
+    st.title("🔎 進階酒款與市場查詢")
     
-    col1, col2 = st.columns([3, 1])
+    # --- 1. 建立搜尋區塊 ---
+    st.markdown("### 🎯 設定搜尋條件")
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
-        keyword = st.text_input("請輸入酒款關鍵字", "Macallan")
+        search_keyword = st.text_input("🥃 品牌/品名 (如:麥卡倫)", "Macallan")
     with col2:
-        days_range = st.selectbox("搜尋範圍", [30, 90, 180, 365], index=1, format_func=lambda x: f"最近 {x} 天")
+        search_series = st.text_input("🏷️ 系列 (如:12年)", "")
+    with col3:
+        search_cask = st.text_input("🛢️ 桶型 (如:雪莉桶)", "")
+    with col4:
+        search_seller = st.text_input("👤 賣家帳號", "")
+
+    days_range = st.selectbox("📅 搜尋範圍", [30, 90, 180, 365], index=1, format_func=lambda x: f"最近 {x} 天")
     
-    if keyword:
-        df_search = db_utils.search_whisky(keyword, days_range)
+    # --- 2. 執行查詢 ---
+    # 當至少有一個搜尋條件時才執行
+    if search_keyword or search_series or search_cask or search_seller:
+        # 明確指定參數名稱 (Keyword Arguments)，避免位置錯亂
+        df_search = db_utils.search_whisky(
+            keyword=search_keyword, 
+            series=search_series, 
+            cask_type=search_cask, 
+            seller=search_seller, 
+            days=days_range
+        )
         
         if not df_search.empty:
             avg_price = int(df_search['price_per_bottle'].mean())
@@ -85,7 +102,8 @@ elif menu == "酒款搜尋 & 趨勢":
             max_price = int(df_search['price_per_bottle'].max())
             count = len(df_search)
             
-            st.markdown(f"### 「{keyword}」 市場統計")
+            st.markdown("---")
+            st.markdown("### 📊 市場統計摘要")
             k1, k2, k3, k4 = st.columns(4)
             k1.metric("平均價格", f"${avg_price:,}")
             k2.metric("最低成交", f"${min_price:,}")
@@ -96,9 +114,14 @@ elif menu == "酒款搜尋 & 趨勢":
             st.subheader("📈 價格走勢圖")
             chart_df = df_search.copy()
             chart_df['post_date'] = pd.to_datetime(chart_df['post_date'])
+            
+            # 動態產生圖表標題
+            title_parts = [p for p in [search_keyword, search_series, search_cask, search_seller] if p]
+            chart_title = " + ".join(title_parts) + " 價格散佈圖" if title_parts else "價格散佈圖"
+            
             fig = px.scatter(chart_df, x='post_date', y='price_per_bottle', 
                              color='brand', hover_data=['標準品名', 'author', 'series', 'style'],
-                             title=f"{keyword} 價格散佈圖")
+                             title=chart_title)
             fig.add_hline(y=avg_price, line_dash="dash", line_color="red", annotation_text="平均價")
             st.plotly_chart(fig, use_container_width=True)
             
@@ -131,7 +154,7 @@ elif menu == "酒款搜尋 & 趨勢":
                 hide_index=True
             )
         else:
-            st.warning("找不到資料，請嘗試其他關鍵字。")
+            st.warning("⚠️ 找不到符合這些條件的報價，請嘗試減少條件或擴大天數範圍。")
 
 elif menu == "熱門品牌排行":
     st.title("🔥 熱門品牌風雲榜")
