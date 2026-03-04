@@ -53,7 +53,10 @@ def get_latest_posts(limit=100):
         df['year'] = df['year'].fillna(0).astype(int).astype(str).replace('0', '')
         df['style'] = df['style'].fillna('')
         df['series'] = df['series'].fillna('')
+
+        df = df.drop_duplicates(subset=['post_date', '標準品名', 'price_per_bottle', 'author'])
     
+
     return df
 
 def search_whisky(keyword="", series="", cask_type="", seller="", days=30):
@@ -98,6 +101,8 @@ def search_whisky(keyword="", series="", cask_type="", seller="", days=30):
         df['year'] = df['year'].fillna(0).astype(int).astype(str).replace('0', '')
         df['style'] = df['style'].fillna('')
         df['series'] = df['series'].fillna('')
+
+        df = df.drop_duplicates(subset=['post_date', '標準品名', 'price_per_bottle', 'author'])
         
     return df
 
