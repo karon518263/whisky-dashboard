@@ -71,6 +71,7 @@ def import_data():
     cursor = conn.cursor()
     posts_added = 0
     prices_added = 0
+    prices_skipped = 0
 
     try:
         print("開始寫入資料庫...")
@@ -118,10 +119,26 @@ def import_data():
 
             # 寫入價格表 (★注意：這裡要存入 series 和 style)
             cursor.execute('''
-                INSERT INTO whisky_prices (post_id, brand, product_name, year, series, style, price_per_bottle)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                SELECT id FROM whisky_prices 
+                WHERE post_id = ? 
+                  AND brand = ? 
+                  AND product_name = ? 
+                  AND year IS ? 
+                  AND series IS ? 
+                  AND style IS ? 
+                  AND price_per_bottle = ?
             ''', (post_id, brand_name, product_name, year_db, series, style, price))
-            prices_added += 1
+            
+            if cursor.fetchone():
+                # 資料庫裡已經有這筆資料了，跳過不處理
+                prices_skipped += 1
+            else:
+                # 找不到重複資料，才真正執行寫入
+                cursor.execute('''
+                    INSERT INTO whisky_prices (post_id, brand, product_name, year, series, style, price_per_bottle)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (post_id, brand_name, product_name, year_db, series, style, price))
+                prices_added += 1
 
         conn.commit()
         print(f"✅ 匯入成功！新增 {posts_added} 篇貼文，{prices_added} 筆報價。")
