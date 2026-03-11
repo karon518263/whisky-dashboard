@@ -7,10 +7,10 @@
 **專案版本**：v1.0
 
 ## 🌟 快速導覽 (Quick Links)
-- 🚀 **[Streamlit 雲端即時展示 (Live Demo)](https://p9-whisky-monitor.streamlit.app/)**
+- 🚀 **[Streamlit 雲端即時展示](https://p9-whisky-monitor.streamlit.app/)**
 - 🎬 **[2 分鐘系統操作展示影片](./demo_video.mp4)**
-- 📄 **[完整專案技術報告 (18頁 PDF)](./docs/P9_Whisky_Market_Report_v1.0.pdf)**
-- 📊 **[專案展示簡報 (15頁 PPTX)](./docs/P9_Whisky_Demo_v1.0.pptx)**
+- 📄 **[完整專案技術報告 ](./docs/P9_Whisky_Market_Report_v1.0.pdf)**
+- 📊 **[專案展示簡報](./docs/P9_Whisky_Demo_v1.0.pptx)**
 
 ---
 
